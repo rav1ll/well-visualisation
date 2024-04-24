@@ -5,6 +5,9 @@ import logging
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import plotly.graph_objects as go
+from pyvis import network as net
+
 
 
 class pipeSystemDrawing():
@@ -15,8 +18,8 @@ class pipeSystemDrawing():
         self.obj_id = -1
         self.pipes = []
 
-        self.node_size = 7
-        self.font_size = 11
+        self.node_size = 40
+        self.font_size = 14
         self.line_width = 1
         self.font_bold = 'normal'
 
@@ -130,7 +133,7 @@ class pipeSystemDrawing():
 
         return pipes_with_obj
 
-    def assemble_pipe_system(self, tube):
+    def assemble_pipe_system(self, tube, draw_wells):
         used_pipes = []
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         '''сбор трубопроводной сети'''
@@ -166,6 +169,7 @@ class pipeSystemDrawing():
         while 1:
             '''сбор труб с учетом нулевых идентификаторов, если сеть обрывается, выводим в лог сообщение'''
             for check_id in found_pipes_idz:
+                # check pipe - труба, идущая от ТП до объекта
                 check_pipe = self.pipe_data[check_id][0]
                 if check_pipe['npo_idn'] == 0:
                     continue
@@ -176,6 +180,10 @@ class pipeSystemDrawing():
                     if key in found_pipes or key in found_pipes_idz:
                         continue
 
+                    if not draw_wells:
+                        if key_pipe['tipn'] == 1:
+                            continue
+
                     '''Обработка врезок'''
                     # if (key_pipe['tipk'] == 122 and key_pipe['npo_idk'] == check_pipe['id']) or (
                     #         key_pipe['tipk'] != 122 and key_pipe['npo_idk'] == check_pipe['npo_idn']):
@@ -184,6 +192,7 @@ class pipeSystemDrawing():
                             key_pipe['tipk'] != 122 and key_pipe['ckt'] == check_pipe['cnt']):
 
                         found_pipes.append(key)
+
                         if key_pipe['tipk'] == 122:
                             if check_pipe['tipk'] != 122:
 
@@ -341,11 +350,9 @@ class pipeSystemDrawing():
         for edge in G.edges():
             spec_node_list.append(edge[0])
             spec_node_list.append(edge[1])
-        # spec_node_list = [val for val in G.nodes()]
         with open(os.path.join('input_data', 'pipe_values.json'), 'r') as fc:
             dc = json.load(fc)
 
-        # label_dic = {val: node_label_by_id[val] for val in spec_node_list}
         label_dic = {val: val for val in spec_node_list}
 
         for item in edge_labelz:
@@ -365,15 +372,29 @@ class pipeSystemDrawing():
                              bbox=label_options,
                              edge_color=edge_color_lst, edge_cmap=plt.cm.RdYlGn)
 
-        draw_label = True
-        edge_label_dict = {}
-
-        # if draw_label:
+        nt = net.Network(height='800px', width='100%', bgcolor='#222222', font_color='white')
+        nt.from_nx(G)
+        for i, edge in enumerate(nt.edges):
+            source = edge['from']
+            target = edge['to']
+            color = edge_color_lst[i]
+            if color < 20:
+                color = 'red'
+            elif color > 40:
+                color = 'green'
+            else:
+                color = 'yellow'
+            edge['color'] = color
+        nt.write_html('graph.html')
+        # draw_label = True
+        # edge_label_dict = {}
         #
-        #     for edge_name in edge_labelz:
-        #         edge_label_dict[edge_name] = edge_labelz[edge_name]['values']['press']
-        #     edge_color_lst = [edge_labelz[edge_name]['values']['press'] for edge_name in edge_labelz]
-        #     nx.draw_networkx_edge_labels(G, pos=nx.kamada_kawai_layout(G), edge_color=edge_color_lst)
+        # # if draw_label:
+        # #
+        # #     for edge_name in edge_labelz:
+        # #         edge_label_dict[edge_name] = edge_labelz[edge_name]['values']['press']
+        # #     edge_color_lst = [edge_labelz[edge_name]['values']['press'] for edge_name in edge_labelz]
+        # #     nx.draw_networkx_edge_labels(G, pos=nx.kamada_kawai_layout(G), edge_color=edge_color_lst)
 
         figure = plt.gcf()  # get current figure
         figure.set_size_inches(30, 20)
@@ -384,7 +405,8 @@ class pipeSystemDrawing():
         plt.savefig(os.path.join('output_data', pic_name))  # , dpi=150)
         ##04082022_end
 
-    def draw_pipe_system(self, obj_id):
+    def draw_pipe_system(self, obj_id, draw_wells):
+        print(draw_wells)
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         used_pipes_lst = []
         '''отрисовка системы трубопровода'''
@@ -410,11 +432,10 @@ class pipeSystemDrawing():
             for tube_with_obj in tube_with_obj_list:
                 curr_pipe_data = self.pipe_data[tube_with_obj][0]
                 selected_data = {key: curr_pipe_data[key] for key in selected_keys}
-
                 if self.pipe_data[tube_with_obj][0]['tipn'] in self.npoz_ignore_list or \
                         self.pipe_data[tube_with_obj][0]['tipk'] in self.npoz_ignore_list: continue
 
-                G, edge_labelz, node_label_by_id, curr_used_pipes = self.assemble_pipe_system(tube_with_obj)
+                G, edge_labelz, node_label_by_id, curr_used_pipes = self.assemble_pipe_system(tube_with_obj, draw_wells)
                 used_pipes_lst.append(selected_data)
                 used_pipes_lst.extend(curr_used_pipes)
 
@@ -452,6 +473,7 @@ class pipeSystemDrawing():
 
 if __name__ == '__main__':
 
+    draw_wells = True
     pipe_drawing = pipeSystemDrawing()
     ##24052022_start
     pipe_drawing.load_pipe_data()
@@ -464,7 +486,7 @@ if __name__ == '__main__':
     if pipe_drawing.npoz:
         for npo in pipe_drawing.npoz:
             print(npo)
-            pipe_drawing.draw_pipe_system(npo)
+            pipe_drawing.draw_pipe_system(npo, draw_wells)
     else:
         wrn_msg = 'Список товарных парков пуст.'
         print(wrn_msg)

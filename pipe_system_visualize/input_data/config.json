@@ -1,11 +1,11 @@
 {
-	"ngdu": 30,
-	"npo_id": 5490,
-	"node_size": 7,
-	"font_size": 13,
-	"line_width": 1,
-	"font_bold": 1,
-	"npok": 1,
-	"label_list": [],
-	"single_pic": 0
+  "ngdu": 30,
+  "npo_id": 5490,
+  "node_size": 7,
+  "font_size": 13,
+  "line_width": 1,
+  "font_bold": 1,
+  "npok": 1,
+  "label_list": [],
+  "single_pic": 0
 }
