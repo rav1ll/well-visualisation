@@ -24,7 +24,7 @@ class pipeSystemDrawing():
         self.font_bold = 'normal'
 
         self.single_pic = False
-
+        self.draw_wells = False
         self.npok = 0
         self.labels = {}
         self.npoz_ignore_list = []
@@ -58,12 +58,12 @@ class pipeSystemDrawing():
         self.node_size = dc['node_size']
         self.font_size = dc['font_size']
         self.line_width = dc['line_width']
+        self.pipe_code = dc['pipe_code']
         if dc['font_bold']:
             self.font_bold = 'bold'
 
         # if self.obj_id == -1:
 
-        ##12122022
         self.npoz_ignore_list = []
         npok = dc['npok']
         if npok == 0:
@@ -71,13 +71,15 @@ class pipeSystemDrawing():
         elif npok == 1:
             self.npoz_ignore_list = [1, 92]
         # self.npoz_ignore_list = []
-        ##12122022
 
         self.single_pic = False
         single_pic = dc['single_pic']
         if single_pic == 1:
             self.single_pic = True
 
+            self.draw_wells = False
+        else:
+            self.draw_wells = dc['draw_wells']
         ##04082022_start
         # label_dic = {0:{'nam':'L', 'armits_key':'len'}, 1:{'nam':'d', 'armits_key':'diam'}}
         label_dic = {0: {'nam': 'L', 'armits_key': 'len', 'si': 'м'}, 1: {'nam': 'd', 'armits_key': 'diam', 'si': 'мм'}}
@@ -89,14 +91,12 @@ class pipeSystemDrawing():
     def load_pipe_data(self):
         '''загрузка данных по трубопроводам из АРМИТС'''
         try:
-            with open(os.path.join('input_data', 'pipe_data2.json'), 'r', encoding='UTF-8') as fin:
+            with open(os.path.join('input_data', 'output1.json'), 'r', encoding='UTF-8') as fin:
                 pipe_data = json.load(fin)['data']
 
                 for val in pipe_data:
 
-                    ##12122022
                     if val['tipn'] == 92: continue
-                    ##12122022
 
                     # if val['sost_t'] == 58 and val['agent'] in [106, 107, 108]:  # or val['sost_t'] == 51]
                     if val['agent'] == 'oil':
@@ -133,7 +133,8 @@ class pipeSystemDrawing():
 
         return pipes_with_obj
 
-    def assemble_pipe_system(self, tube, draw_wells):
+    def assemble_pipe_system(self, tube):
+        draw_wells = self.draw_wells
         used_pipes = []
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         '''сбор трубопроводной сети'''
@@ -187,14 +188,14 @@ class pipeSystemDrawing():
                     '''Обработка врезок'''
                     # if (key_pipe['tipk'] == 122 and key_pipe['npo_idk'] == check_pipe['id']) or (
                     #         key_pipe['tipk'] != 122 and key_pipe['npo_idk'] == check_pipe['npo_idn']):
-                    if (key_pipe['tipk'] == 122 and (
+                    if (key_pipe['tipk'] == self.pipe_code and (
                             key_pipe['ckt'] == check_pipe['cnam'] or key_pipe['npo_idk'] == check_pipe['id'])) or (
-                            key_pipe['tipk'] != 122 and key_pipe['ckt'] == check_pipe['cnt']):
+                            key_pipe['tipk'] != self.pipe_code and key_pipe['ckt'] == check_pipe['cnt']):
 
                         found_pipes.append(key)
 
-                        if key_pipe['tipk'] == 122:
-                            if check_pipe['tipk'] != 122:
+                        if key_pipe['tipk'] == self.pipe_code:
+                            if check_pipe['tipk'] != self.pipe_code:
 
                                 ##17082022_start
                                 # key1 = 'npo_idn'
@@ -234,10 +235,10 @@ class pipeSystemDrawing():
                                 vrez_id = check_pipe['npo_idk']
                                 check_pipe_2 = self.pipe_data[vrez_id][0]
 
-                                while check_pipe_2['tipk'] == 122:
+                                while check_pipe_2['tipk'] == self.pipe_code:
                                     new_vrez_id = check_pipe_2['npo_idk']
                                     check_pipe_2 = self.pipe_data[new_vrez_id][0]
-                                    if check_pipe_2['tipk'] != 122:
+                                    if check_pipe_2['tipk'] != self.pipe_code:
                                         break
 
                                 # key1 = 'npo_idn'
@@ -304,7 +305,6 @@ class pipeSystemDrawing():
                         wrn_msg = 'Не идентифицировано начало трубы. Идентификатор: {ident}, наименование трубы: {cnam}'.format(
                             ident=key, cnam=key_pipe['cnam'])
                         logging.warning(wrn_msg)
-
             if found_pipes:
                 found_pipes_idz += found_pipes
                 found_pipes = []
@@ -361,7 +361,9 @@ class pipeSystemDrawing():
 
         label_options = {"ec": "k", "fc": "white", "alpha": 0.7}
 
-        edge_color_lst = [edge_labelz[edge_name]['values']['press'] for edge_name in edge_labelz]
+        edge_color_lst = [edge_labelz[edge_name]['values']['pressure'] for edge_name in edge_labelz]
+
+        edge_values_dict = {edge_name: edge_labelz[edge_name]['values'] for edge_name in edge_labelz}
 
         # пока цвета ребер - значения давлений, минимальные - красные, зеленые - максимальные
         # todo - сделать чтобы зелеными были значения в допустимом диапазоне, желтые немного отличающиеся, красные - сильно
@@ -385,7 +387,29 @@ class pipeSystemDrawing():
             else:
                 color = 'yellow'
             edge['color'] = color
-        nt.write_html('graph.html')
+        def change_edge_color(g,param_name):
+            for edge in g.edges:
+                if (edge["from"], edge["to"]) in edge_values_dict:
+                    edge_id = (edge["from"], edge["to"])
+                elif (edge["to"], edge["from"]) in edge_values_dict:
+                    edge_id = (edge["to"], edge["from"])
+                param_value = edge_values_dict[edge_id][param_name]
+                edge['title'] = param_name + ':' + str(param_value)
+                if param_value < 20:
+                    param_value = 'red'
+                elif param_value > 40:
+                    param_value = 'green'
+                else:
+                    param_value = 'yellow'
+
+                edge["color"] = param_value
+
+        # change_edge_color(nt,'debit')
+        # nt.write_html(os.path.join('data_html', pic_name[:-4] + '_debit' + '.html'))
+
+        change_edge_color(nt, 'pressure')
+        nt.write_html(os.path.join('data_html', pic_name[:-4] + '.html'))
+
         # draw_label = True
         # edge_label_dict = {}
         #
@@ -405,8 +429,7 @@ class pipeSystemDrawing():
         plt.savefig(os.path.join('output_data', pic_name))  # , dpi=150)
         ##04082022_end
 
-    def draw_pipe_system(self, obj_id, draw_wells):
-        print(draw_wells)
+    def draw_pipe_system(self, obj_id):
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         used_pipes_lst = []
         '''отрисовка системы трубопровода'''
@@ -435,7 +458,7 @@ class pipeSystemDrawing():
                 if self.pipe_data[tube_with_obj][0]['tipn'] in self.npoz_ignore_list or \
                         self.pipe_data[tube_with_obj][0]['tipk'] in self.npoz_ignore_list: continue
 
-                G, edge_labelz, node_label_by_id, curr_used_pipes = self.assemble_pipe_system(tube_with_obj, draw_wells)
+                G, edge_labelz, node_label_by_id, curr_used_pipes = self.assemble_pipe_system(tube_with_obj)
                 used_pipes_lst.append(selected_data)
                 used_pipes_lst.extend(curr_used_pipes)
 
@@ -473,8 +496,9 @@ class pipeSystemDrawing():
 
 if __name__ == '__main__':
 
-    draw_wells = True
+
     pipe_drawing = pipeSystemDrawing()
+
     ##24052022_start
     pipe_drawing.load_pipe_data()
 
@@ -486,7 +510,7 @@ if __name__ == '__main__':
     if pipe_drawing.npoz:
         for npo in pipe_drawing.npoz:
             print(npo)
-            pipe_drawing.draw_pipe_system(npo, draw_wells)
+            pipe_drawing.draw_pipe_system(npo)
     else:
         wrn_msg = 'Список товарных парков пуст.'
         print(wrn_msg)
