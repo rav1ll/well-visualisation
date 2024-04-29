@@ -9,5 +9,7 @@
   "label_list": [],
   "single_pic": 0,
   "draw_wells": 1,
-  "pipe_code": "pipe"
+  "pipe_code": "pipe",
+  "pressure_optimal_value": 40,
+  "pressure_deviation": 0.1
 }

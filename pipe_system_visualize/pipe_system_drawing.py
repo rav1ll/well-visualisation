@@ -9,7 +9,6 @@ import plotly.graph_objects as go
 from pyvis import network as net
 
 
-
 class pipeSystemDrawing():
 
     def __init__(self):
@@ -62,6 +61,9 @@ class pipeSystemDrawing():
         if dc['font_bold']:
             self.font_bold = 'bold'
 
+        self.press_deviation = dc['pressure_deviation']
+        self.optimal_pressure = dc['pressure_optimal_value']
+
         # if self.obj_id == -1:
 
         self.npoz_ignore_list = []
@@ -91,7 +93,7 @@ class pipeSystemDrawing():
     def load_pipe_data(self):
         '''загрузка данных по трубопроводам из АРМИТС'''
         try:
-            with open(os.path.join('input_data', 'output1.json'), 'r', encoding='UTF-8') as fin:
+            with open(os.path.join('input_data', 'final_pipe_data.json'), 'r', encoding='UTF-8') as fin:
                 pipe_data = json.load(fin)['data']
 
                 for val in pipe_data:
@@ -387,7 +389,8 @@ class pipeSystemDrawing():
             else:
                 color = 'yellow'
             edge['color'] = color
-        def change_edge_color(g,param_name):
+
+        def change_edge_color(g, param_name):
             for edge in g.edges:
                 if (edge["from"], edge["to"]) in edge_values_dict:
                     edge_id = (edge["from"], edge["to"])
@@ -395,12 +398,19 @@ class pipeSystemDrawing():
                     edge_id = (edge["to"], edge["from"])
                 param_value = edge_values_dict[edge_id][param_name]
                 edge['title'] = param_name + ':' + str(param_value)
-                if param_value < 20:
-                    param_value = 'red'
-                elif param_value > 40:
+
+                if self.optimal_pressure * (1 - self.press_deviation) <= float(param_value) <= self.optimal_pressure * (
+                        1 + self.press_deviation):
                     param_value = 'green'
+
                 else:
                     param_value = 'yellow'
+
+                if (param_value != 'yellow' and param_value != 'green') and (float(param_value) >= self.optimal_pressure * (
+                        1 + 2 * self.press_deviation) or float(param_value) <= self.optimal_pressure * (
+                        1 - 2 * self.press_deviation)):
+                    param_value = 'red'
+
 
                 edge["color"] = param_value
 
@@ -494,9 +504,7 @@ class pipeSystemDrawing():
             logging.error(wrn_msg)
 
 
-if __name__ == '__main__':
-
-
+def draw_system():
     pipe_drawing = pipeSystemDrawing()
 
     ##24052022_start
@@ -516,3 +524,7 @@ if __name__ == '__main__':
         print(wrn_msg)
         logging.error(wrn_msg)
     ##24052022_end
+
+
+if __name__ == '__main__':
+    draw_system()
