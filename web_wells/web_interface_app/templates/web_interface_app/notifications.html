@@ -20,19 +20,27 @@
 </nav>
 
     <div class="name-bar">
-    Уведомления для отклонений по давлениям
+    Уведомления
     </div>
 
 
     <div class="notification-content">
-        <div class="scrollable-list">
-          <ul>
-            {% for key, value in files.items %}
-              <li class="notification-item">{{ key }}: {{ value }}</li>
+    <div class="scrollable-list">
+        <ul>
+            {% for key, values in files.items %}
+                <div class="content">
+                    <li class="notification-item" style="width: 200px; align-content: center;background-color: #cecece">{{ key }}</li>
+
+                    {% for value_key, value in values.items %}
+                        <li class="notification-item" style="align-content: center;width: auto; height: ">{{ value }}</li>
+                    {% endfor %}
+                </div>
             {% endfor %}
-          </ul>
+        </ul>
         </div>
-        <label style="margin-right: 150px; margin-top: 100px; background-color:#a8d4ff; padding: 30px; border-radius: 20px ">
+    </div>
+
+        <label style="margin-right: 120px; margin-top: 100px; background-color:#a8d4ff; padding: 10px; border-radius: 20px ">
 
         Уведомления для отклонений по давлениям. Здесь указаны трубопроводы, значения давлений в которых отклоняются более чем на 10 процентов от заданного оптимального значения
         </label>
@@ -48,11 +56,18 @@
 
 
     }
+    .content{
+        display: flex;
+        flex-direction: row;
+        background-color: #4588e6;
+        margin: 8px;
+        border-radius: 16px;
+    }
     .scrollable-list {
         padding: 12px;
         margin: 70px;
-        margin-left: 150px;
-        width: 550px;
+        margin-left: 120px;
+        width: auto;
         max-height: 700px; /* Задаем максимальную высоту для списка */
         overflow-y: auto; /* Добавляем вертикальную прокрутку */
         border: 1px solid #ccc; /* Добавляем рамку для стилизации */
@@ -72,10 +87,10 @@
         background-color: #86d5f8;
         padding: 12px;
         margin: 20px;
-        margin-left: 150px;
+        margin-left: 120px;
         border-radius: 19px;
         width: auto;
-        margin-right: 150px;
+        margin-right: 120px;
         font-size: 30px;
     }
 

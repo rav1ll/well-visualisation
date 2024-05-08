@@ -6,6 +6,8 @@ from django.shortcuts import render
 from django.utils.safestring import mark_safe
 # Create your views here.
 import os
+import random
+import datetime
 
 
 def monitoring(request):
@@ -35,13 +37,19 @@ def home(request):
 def notifications(request):
     notification_files_path = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\input_data\\warnings.json'
     with open(notification_files_path, 'r', encoding='utf-8') as file:
-
         dc = json.load(file)
 
+    new_dict = {}
+    for item in dc:
+
+
+        val = str(dc[item]['pressure'])
+        new_dict[item] = {'error': ('Значение давления равно ' +  val + ', что является превышением'), 'date': datetime.datetime.strptime(dc[item]['date'], "%d %b %Y").date() }
+        print(new_dict[item]['date'])
+
+    sorted_data = dict(sorted(new_dict.items(), key=lambda item: item[1]['date']))
 
     context = {
-        'files': dc,
+        'files': sorted_data,
     }
     return render(request, 'web_interface_app/notifications.html', context)
-
-

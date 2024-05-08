@@ -482,14 +482,13 @@ class pipeSystemDrawing():
 
                 else:
                     pipe_nam = self.pipe_data[tube_with_obj][0]['cnam']
-                    pic_name = '{npo_id}_{pipe}.png'.format(npo_id=obj_id, pipe=str(pipe_nam))
+                    pic_name = 'Участок сети {pipe}.png'.format(npo_id=obj_id, pipe=str(pipe_nam))
 
                     self.save_fig(G, edge_labelz, node_label_by_id, pic_name)
 
             if self.single_pic:
                 if total_G is not None:
-                    pic_name = '{npo_id}_{npo_nam}.png'.format(npo_id=obj_id,
-                                                               npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
+                    pic_name = 'Полная сеть для {npo_nam}.png'.format(npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
                     self.save_fig(total_G, total_edge_labelz, total_node_label_by_id, pic_name)
 
             # print(used_pipes_lst)
