@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import logging
+from collections import defaultdict
+
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -447,21 +449,21 @@ class pipeSystemDrawing():
 
         figure = plt.gcf()  # get current figure
         figure.set_size_inches(30, 20)
-        # plt.show()
-        # plt.savefig(os.path.join('output_data', '{}.png'.format(str(self.obj_id))) )#, dpi=150)
+
 
         ##04082022_start
         plt.savefig(os.path.join('output_data', pic_name))  # , dpi=150)
         ##04082022_end
 
     def draw_pipe_system(self, obj_id):
+
+        pipe_by_graph = defaultdict(lambda:[])
+        pipes_info = {}
+
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         used_pipes_lst = []
         '''отрисовка системы трубопровода'''
-        # self.load_pipe_data()
 
-        # self.assemble_pipe_system(1515, 5491)
-        # return
 
         if not self.pipe_data:
             err_msg = 'Отсутствуют данные по трубопроводам'
@@ -501,11 +503,21 @@ class pipeSystemDrawing():
 
                     self.save_fig(G, edge_labelz, node_label_by_id, pic_name)
 
+                    for item in edge_labelz:
+                        pipe_by_graph[pic_name].append(edge_labelz[item]['id'])
+                        key = str(edge_labelz[item]['edge']).strip("()").strip('"')
+                        pipes_info[key] = {'id': edge_labelz[item]['id']}
+
+            with open("input_data/pipe_by_graph.json", "w", encoding='utf-8') as json_file:
+                json.dump(dict(pipe_by_graph), json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
+            with open("input_data/pipe_notify.json", "w", encoding='utf-8') as json_file:
+                json.dump(pipes_info, json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
             if self.single_pic:
                 if total_G is not None:
                     pic_name = 'Полная сеть для {npo_nam}.png'.format(
                         npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
                     self.save_fig(total_G, total_edge_labelz, total_node_label_by_id, pic_name)
+
 
             # print(used_pipes_lst)
             # data = {"data": used_pipes_lst}

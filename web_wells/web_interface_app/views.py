@@ -89,11 +89,15 @@ def notifications(request):
 
     new_dict = {}
     for item in dc:
-        val = str(dc[item]['pressure'])
-        new_dict[item] = {'error': ('Значение давления равно ' + val + ', что является превышением'),
-                          'date': datetime.datetime.strptime(dc[item]['date'], "%d %b %Y").date()}
-        print(new_dict[item]['date'])
-
+        if 'pressure' in dc[item]:
+            val = str(dc[item]['pressure'])
+            new_dict[item] = {'error': ('Значение давления равно ' + val + ' Атм, что является превышением'),
+                              'date': dc[item]['date']}
+        elif 'debit' in dc[item]:
+            val = str(dc[item]['debit'])
+            new_dict[item] = {'error': ('Значение дебита слишком низкое, равно ' + val + ' м3'),
+                              'date': dc[item]['date']}
+    print(new_dict)
     sorted_data = dict(sorted(new_dict.items(), key=lambda item: item[1]['date']))
 
     context = {

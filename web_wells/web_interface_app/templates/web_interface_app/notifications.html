@@ -29,11 +29,11 @@
     <div class="scrollable-list">
         <ul>
             {% for key, values in files.items %}
-                <div class="content">
+                <div class="content" style="justify-content: space-between;">
                     <li class="notification-item" style="width: 200px; align-content: center;background-color: #cecece">{{ key }}</li>
 
                     {% for value_key, value in values.items %}
-                        <li class="notification-item" style="align-content: center;width: auto; height: ">{{ value }}</li>
+                        <li class="notification-item" style="align-content: center;width: auto; ">{{ value }}</li>
                     {% endfor %}
                 </div>
             {% endfor %}
