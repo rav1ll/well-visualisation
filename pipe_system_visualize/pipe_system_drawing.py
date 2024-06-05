@@ -389,6 +389,9 @@ class pipeSystemDrawing():
             else:
                 color = 'yellow'
             edge['color'] = color
+        date = '2022-01-02  13:00'
+        self.debit_deviation = 1
+        self.optimal_debit = 1
 
         def change_edge_color(g, param_name):
             for edge in g.edges:
@@ -397,29 +400,41 @@ class pipeSystemDrawing():
                 elif (edge["to"], edge["from"]) in edge_values_dict:
                     edge_id = (edge["to"], edge["from"])
                 param_value = edge_values_dict[edge_id][param_name]
-                edge['title'] = param_name + ':' + str(param_value)
+                edge['title'] = param_name + ': ' + str(param_value) + '\n date: ' + date
 
-                if self.optimal_pressure * (1 - self.press_deviation) <= float(param_value) <= self.optimal_pressure * (
-                        1 + self.press_deviation):
-                    param_value = 'green'
+                if param_name == 'pressure':
+                    if self.optimal_pressure * (1 - self.press_deviation) <= float(
+                            param_value) <= self.optimal_pressure * (
+                            1 + self.press_deviation):
+                        param_value = 'green'
 
-                else:
-                    param_value = 'yellow'
+                    else:
+                        param_value = 'yellow'
 
-                if (param_value != 'yellow' and param_value != 'green') and (float(param_value) >= self.optimal_pressure * (
-                        1 + 2 * self.press_deviation) or float(param_value) <= self.optimal_pressure * (
-                        1 - 2 * self.press_deviation)):
-                    param_value = 'red'
+                    if (param_value != 'yellow' and param_value != 'green') and (
+                            float(param_value) >= self.optimal_pressure * (
+                            1 + 2 * self.press_deviation) or float(param_value) <= self.optimal_pressure * (
+                                    1 - 2 * self.press_deviation)):
+                        param_value = 'red'
 
+                elif param_name == 'debit':
+                    if self.optimal_debit * (1 - self.debit_deviation) <= float(
+                            param_value) <= self.optimal_debit * (
+                            1 + self.debit_deviation):
+                        param_value = 'green'
+                    else:
+                        param_value = 'yellow'
 
                 edge["color"] = param_value
 
         # change_edge_color(nt,'debit')
         # nt.write_html(os.path.join('data_html', pic_name[:-4] + '_debit' + '.html'))
 
-        change_edge_color(nt, 'pressure')
-        nt.write_html(os.path.join('data_html', pic_name[:-4] + '.html'))
+        change_edge_color(nt, 'debit')
+        nt.write_html(os.path.join('data_html', 'debits', pic_name[:-4] + '.html'))
 
+        change_edge_color(nt, 'pressure')
+        nt.write_html(os.path.join('data_html', 'pressures', pic_name[:-4] + '.html'))
         # draw_label = True
         # edge_label_dict = {}
         #
@@ -488,7 +503,8 @@ class pipeSystemDrawing():
 
             if self.single_pic:
                 if total_G is not None:
-                    pic_name = 'Полная сеть для {npo_nam}.png'.format(npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
+                    pic_name = 'Полная сеть для {npo_nam}.png'.format(
+                        npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
                     self.save_fig(total_G, total_edge_labelz, total_node_label_by_id, pic_name)
 
             # print(used_pipes_lst)

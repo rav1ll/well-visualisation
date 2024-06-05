@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Мониторинг сети трубопроводов</title>
+
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/debits_monitoring">Мониторинг дебитов</a></li>
+            <li><a href=" ">Мониторинг давлений</a></li>
+            <li><a href="/notifications">Уведомления</a></li>
+
+        </ul>
+    </nav>
+
+    <div class="well-visualization">
+
+    <form method="post">
+        <div class="well-visualization-settings">
+
+
+            {% csrf_token %}
+
+            <label style="background-color: #86d5f8; padding: 30px">Выберите участок трубопровода </label>
+            <label style="background-color: #86d5f8; padding: 30px">Текущий товарный парк - ТП-2</label>
+
+
+                {% for file_name in files %}
+                    <div class="custom-button">
+                        <input type="submit" id="{{ file_name }}" name="selected_file" value="{{ file_name }}" style="styles.custom-button">
+                    </div>
+                {% endfor %}
+
+
+        </div>
+    </form>
+        <div class="selected-file">
+            {% if selected_file %}
+            {{ selected_file|safe }}
+            {% endif %}
+        </div>
+    </div>
+
+
+    <style>
+
+        .custom-button{
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-bottom:10px;
+            padding: 15px;
+            border-radius: 17px;
+            background-color: #86d5f8;
+
+            cursor: pointer;
+
+        }
+        .well-visualization{
+            display: flex;
+            flex-direction: row;
+            background-color: #b9dac6;
+            min-height: 100vh;
+            gap: 20px;
+            padding-top: 40px;
+        }
+        .well-visualization-settings{
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            margin: 30px;
+            border-radius: 21px;
+            gap: 30px;
+            background-color: #21812a;
+        }
+        .selected-file {
+            width: 1200px;
+            height: 800px;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, serif;
+            flex-direction: row;
+        }
+
+
+        head {
+            font-family: Arial, serif;
+
+            height: 80px;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            font-size: 1rem;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 3px;
+            overflow: hidden;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a {
+            display: block;
+            color: white;
+            margin: 2px;
+            text-align: center;
+            padding: 22px 16px;
+            text-decoration: none;
+        }
+
+        li a:hover {
+            background-color: #c24a4a;
+        }
+
+
+    </style>
+
+</body>
+</html>
