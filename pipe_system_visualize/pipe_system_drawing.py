@@ -505,13 +505,11 @@ class pipeSystemDrawing():
 
                     for item in edge_labelz:
                         pipe_by_graph[pic_name].append(edge_labelz[item]['id'])
-                        key = str(edge_labelz[item]['edge']).strip("()").strip('"')
-                        pipes_info[key] = {'id': edge_labelz[item]['id']}
+
 
             with open("input_data/pipe_by_graph.json", "w", encoding='utf-8') as json_file:
                 json.dump(dict(pipe_by_graph), json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
-            with open("input_data/pipe_notify.json", "w", encoding='utf-8') as json_file:
-                json.dump(pipes_info, json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
+
             if self.single_pic:
                 if total_G is not None:
                     pic_name = 'Полная сеть для {npo_nam}.png'.format(

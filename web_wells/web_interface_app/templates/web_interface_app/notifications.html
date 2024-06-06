@@ -21,7 +21,7 @@
 </nav>
 
     <div class="name-bar">
-    Уведомления
+    Уведомления по трубопроводам
     </div>
 
 
@@ -30,11 +30,13 @@
         <ul>
             {% for key, values in files.items %}
                 <div class="content" style="justify-content: space-between;">
+
                     <li class="notification-item" style="width: 200px; align-content: center;background-color: #cecece">{{ key }}</li>
 
-                    {% for value_key, value in values.items %}
-                        <li class="notification-item" style="align-content: center;width: auto; ">{{ value }}</li>
-                    {% endfor %}
+                    <li class="notification-item">{{ values.graph_nam }}</li>
+                    <li class="notification-item">{{ values.error }}</li>
+                    <li class="notification-item">{{ values.date }}</li>
+
                 </div>
             {% endfor %}
         </ul>
@@ -66,7 +68,7 @@
     }
     .scrollable-list {
         padding: 12px;
-        margin: 70px;
+        margin: 40px;
         margin-left: 120px;
         width: auto;
         max-height: 700px; /* Задаем максимальную высоту для списка */

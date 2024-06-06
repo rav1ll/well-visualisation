@@ -45,7 +45,6 @@ def debits_monitoring(request):
     return render(request, 'web_interface_app/debits_monitoring.html', context)
 
 
-
 def pressures_monitoring(request):
     html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\data_html'  # Укажите путь к папке с HTML файлами
     for dir_name in os.listdir(html_files_folder):
@@ -78,6 +77,7 @@ def pressures_monitoring(request):
 
     return render(request, 'web_interface_app/pressures_monitoring.html', context)
 
+
 def home(request):
     return render(request, 'web_interface_app/home.html')
 
@@ -86,21 +86,34 @@ def notifications(request):
     notification_files_path = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\input_data\\warnings.json'
     with open(notification_files_path, 'r', encoding='utf-8') as file:
         dc = json.load(file)
-
+    with open('C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\input_data\\pipe_by_graph.json',
+              'r', encoding='utf-8') as file:
+        dc_links = json.load(file)
     new_dict = {}
     for item in dc:
-        if 'pressure' in dc[item]:
-            val = str(dc[item]['pressure'])
-            new_dict[item] = {'error': ('Значение давления равно ' + val + ' Атм, что является превышением'),
-                              'date': dc[item]['date']}
-        elif 'debit' in dc[item]:
-            val = str(dc[item]['debit'])
-            new_dict[item] = {'error': ('Значение дебита слишком низкое, равно ' + val + ' м3'),
-                              'date': dc[item]['date']}
-    print(new_dict)
+        id = int(dc[item]['id'])
+
+        graph_nam = 0
+        for graph_name in dc_links:
+
+            if id in dc_links[graph_name]:
+                graph_nam = graph_name
+
+        if graph_nam != 0:
+            if 'pressure' in dc[item]:
+                val = str(dc[item]['pressure'])
+
+                new_dict[item] = {'error': ('Значение давления равно ' + val + ' Атм, что является превышением'),
+                                  'date': dc[item]['date'], 'id': id, 'graph_nam': graph_nam}
+            elif 'debit' in dc[item]:
+                val = str(dc[item]['debit'])
+                new_dict[item] = {'error': ('Значение дебита слишком низкое, равно ' + val + ' м3'),
+                                  'date': dc[item]['date'], 'id': id, 'graph_nam': graph_nam}
+
     sorted_data = dict(sorted(new_dict.items(), key=lambda item: item[1]['date']))
 
     context = {
         'files': sorted_data,
+        'links': dc_links
     }
     return render(request, 'web_interface_app/notifications.html', context)

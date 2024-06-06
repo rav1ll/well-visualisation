@@ -11,5 +11,6 @@
   "draw_wells": 1,
   "pipe_code": "pipe",
   "pressure_optimal_value": 40,
-  "pressure_deviation": 0.1
+  "pressure_deviation": 0.1,
+  "min_debit": 6
 }
