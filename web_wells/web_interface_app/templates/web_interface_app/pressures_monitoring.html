@@ -28,9 +28,8 @@
 
             {% csrf_token %}
 
-            <label style="background-color: #86d5f8; padding: 30px">Выберите участок трубопровода </label>
             <label style="background-color: #86d5f8; padding: 30px">Текущий товарный парк - ТП-2</label>
-
+            <label style="background-color: #86d5f8; padding: 30px">Выберите участок трубопровода для просмотра давлений</label>
 
                 {% for file_name in files %}
                     <div class="custom-button">
@@ -66,7 +65,7 @@
         .well-visualization{
             display: flex;
             flex-direction: row;
-            background-color: #b9dac6;
+            background-color: #17354d;
             min-height: 100vh;
             gap: 20px;
             padding-top: 40px;
@@ -78,7 +77,7 @@
             margin: 30px;
             border-radius: 21px;
             gap: 30px;
-            background-color: #21812a;
+            background-color: #1a4b34;
         }
         .selected-file {
             width: 1200px;

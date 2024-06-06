@@ -37,23 +37,25 @@ for item in dc:
             curr_id = str(pipe_dct['id'])
             curr_date = dc[curr_id]['time']
 
+    # хардкод обработка некорректных данных
+    if ' - Скв' not in curr_nam:
 
-    if not optimal_pressure * (1 - 4*pressure_deviation) <= curr_pressure <= optimal_pressure * (1 + 4*pressure_deviation):
-        pass
+        if not optimal_pressure * (1 - 4*pressure_deviation) <= curr_pressure <= optimal_pressure * (1 + 4*pressure_deviation):
+            pass
 
-    else:
-        if curr_nam not in warning_dict:
-            warning_dict[curr_nam] = {}
-        warning_dict[curr_nam]['pressure'] = curr_pressure
-        warning_dict[curr_nam]['date'] = curr_date
-        warning_dict[curr_nam]['id'] = curr_id
-
-    if curr_debit <= min_optimal_debit:
-        if curr_nam not in warning_dict:
-            warning_dict[curr_nam] = {}
+        else:
+            if curr_nam not in warning_dict:
+                warning_dict[curr_nam] = {}
+            warning_dict[curr_nam]['pressure'] = curr_pressure
             warning_dict[curr_nam]['date'] = curr_date
             warning_dict[curr_nam]['id'] = curr_id
-        warning_dict[curr_nam]['debit'] = curr_debit
+
+        if curr_debit <= min_optimal_debit:
+            if curr_nam not in warning_dict:
+                warning_dict[curr_nam] = {}
+                warning_dict[curr_nam]['date'] = curr_date
+                warning_dict[curr_nam]['id'] = curr_id
+            warning_dict[curr_nam]['debit'] = curr_debit
 
 with open("input_data/warnings.json", "w", encoding='utf-8') as json_file:
     json.dump(warning_dict, json_file, ensure_ascii=False, indent=4, separators=(',', ': '))

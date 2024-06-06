@@ -103,7 +103,7 @@ def notifications(request):
             if 'pressure' in dc[item]:
                 val = str(dc[item]['pressure'])
 
-                new_dict[item] = {'error': ('Значение давления равно ' + val + ' Атм, что является превышением'),
+                new_dict[item] = {'error': ('Значение давления равно ' + val + ' Атм, что является недопустимым'),
                                   'date': dc[item]['date'], 'id': id, 'graph_nam': graph_nam}
             elif 'debit' in dc[item]:
                 val = str(dc[item]['debit'])
