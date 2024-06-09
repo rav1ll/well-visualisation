@@ -1,16 +1,17 @@
 {
   "ngdu": 30,
   "npo_id": 4008,
-  "node_size": 7,
-  "font_size": 13,
-  "line_width": 1,
+  "node_size": 8,
+  "font_size": 20,
+  "line_width": 4,
   "font_bold": 1,
+  "font_color": "white",
   "npok": 1,
   "label_list": [],
   "single_pic": 0,
   "draw_wells": 1,
   "pipe_code": "pipe",
-  "pressure_optimal_value": 40,
-  "pressure_deviation": 0.1,
+  "pressure_optimal_value": 60,
+  "pressure_deviation": 0.2,
   "min_debit": 6
 }

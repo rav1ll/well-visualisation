@@ -60,6 +60,8 @@ class pipeSystemDrawing():
         self.font_size = dc['font_size']
         self.line_width = dc['line_width']
         self.pipe_code = dc['pipe_code']
+        self.optimal_debit = dc['min_debit']
+        self.font_color = dc['font_color']
         if dc['font_bold']:
             self.font_bold = 'bold'
 
@@ -153,7 +155,6 @@ class pipeSystemDrawing():
         plt.clf()
 
         G = nx.Graph()
-
         G.add_edge(self.pipe_data[tube][0]['cnt'], self.pipe_data[tube][0]['ckt'])
 
         node_label_by_id[self.pipe_data[tube][0]['npo_idn']] = self.pipe_data[tube][0]['cnt']
@@ -354,7 +355,7 @@ class pipeSystemDrawing():
         for edge in G.edges():
             spec_node_list.append(edge[0])
             spec_node_list.append(edge[1])
-        with open(os.path.join('input_data', 'pipe_values.json'), 'r') as fc:
+        with open(os.path.join('input_data', 'pipe_values_ext.json'), 'r') as fc:
             dc = json.load(fc)
 
         label_dic = {val: val for val in spec_node_list}
@@ -366,66 +367,68 @@ class pipeSystemDrawing():
         label_options = {"ec": "k", "fc": "white", "alpha": 0.7}
 
         edge_color_lst = [edge_labelz[edge_name]['values']['pressure'] for edge_name in edge_labelz]
-
         edge_values_dict = {edge_name: edge_labelz[edge_name]['values'] for edge_name in edge_labelz}
 
         # пока цвета ребер - значения давлений, минимальные - красные, зеленые - максимальные
-        # todo - сделать чтобы зелеными были значения в допустимом диапазоне, желтые немного отличающиеся, красные - сильно
 
         nx.draw_kamada_kawai(G, with_labels=True, node_size=self.node_size,
                              font_size=self.font_size, width=self.line_width, labels=label_dic, nodelist=spec_node_list,
                              font_weight=self.font_bold,
                              bbox=label_options,
                              edge_color=edge_color_lst, edge_cmap=plt.cm.RdYlGn)
-
-        nt = net.Network(height='800px', width='100%', bgcolor='#222222', font_color='white')
+        nt = net.Network(height='800px', width='100%', bgcolor='#222222', font_color=self.font_color)
         nt.from_nx(G)
+        for e in nt.edges:
+
+            e['width'] = self.line_width
+        for n in nt.nodes:
+            n["size"] = self.node_size
+            n["font"] = {"size": self.font_size, "color": self.font_color, "font_face": 'Arial'}
+            n["color"] = '#4773fc'
         for i, edge in enumerate(nt.edges):
-            source = edge['from']
-            target = edge['to']
-            color = edge_color_lst[i]
-            if color < 20:
-                color = 'red'
-            elif color > 40:
-                color = 'green'
-            else:
-                color = 'yellow'
-            edge['color'] = color
-        date = '2022-01-02  13:00'
-        self.debit_deviation = 1
-        self.optimal_debit = 1
+
+            edge['color'] = 'red'
+
+
 
         def change_edge_color(g, param_name):
+
+            medium_warn_color = 'e3c000'
+            no_warn_color = '427043'
+            warn_color = '7a1717'
+
             for edge in g.edges:
                 if (edge["from"], edge["to"]) in edge_values_dict:
                     edge_id = (edge["from"], edge["to"])
                 elif (edge["to"], edge["from"]) in edge_values_dict:
                     edge_id = (edge["to"], edge["from"])
                 param_value = edge_values_dict[edge_id][param_name]
-                edge['title'] = param_name + ': ' + str(param_value) + '\n date: ' + date
+                edge['title'] = param_name + ': ' + str(param_value) + '\n date: ' + edge_values_dict[edge_id]['time']
+
 
                 if param_name == 'pressure':
                     if self.optimal_pressure * (1 - self.press_deviation) <= float(
                             param_value) <= self.optimal_pressure * (
                             1 + self.press_deviation):
-                        param_value = 'green'
+                        param_value = no_warn_color
 
-                    else:
-                        param_value = 'yellow'
+                    elif self.optimal_pressure * (1 - 2 * self.press_deviation) <= float(
+                            param_value) <= self.optimal_pressure * (
+                            1 + 2 * self.press_deviation):
+                        param_value = medium_warn_color
 
-                    if (param_value != 'yellow' and param_value != 'green') and (
+
+                    elif (param_value != medium_warn_color and param_value != no_warn_color) and (
                             float(param_value) >= self.optimal_pressure * (
                             1 + 2 * self.press_deviation) or float(param_value) <= self.optimal_pressure * (
                                     1 - 2 * self.press_deviation)):
-                        param_value = 'red'
+                        param_value = warn_color
 
                 elif param_name == 'debit':
-                    if self.optimal_debit * (1 - self.debit_deviation) <= float(
-                            param_value) <= self.optimal_debit * (
-                            1 + self.debit_deviation):
-                        param_value = 'green'
+                    if float(param_value) > self.optimal_debit:
+                        param_value = no_warn_color
                     else:
-                        param_value = 'yellow'
+                        param_value = medium_warn_color
 
                 edge["color"] = param_value
 

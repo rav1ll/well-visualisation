@@ -40,10 +40,9 @@ for item in dc:
     # хардкод обработка некорректных данных
     if ' - Скв' not in curr_nam:
 
-        if not optimal_pressure * (1 - 4*pressure_deviation) <= curr_pressure <= optimal_pressure * (1 + 4*pressure_deviation):
-            pass
 
-        else:
+
+        if curr_pressure <= optimal_pressure * (1 - 2*pressure_deviation) or curr_pressure >= optimal_pressure * (1 + 2*pressure_deviation):
             if curr_nam not in warning_dict:
                 warning_dict[curr_nam] = {}
             warning_dict[curr_nam]['pressure'] = curr_pressure

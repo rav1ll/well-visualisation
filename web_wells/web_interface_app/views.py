@@ -79,7 +79,21 @@ def pressures_monitoring(request):
 
 
 def home(request):
-    return render(request, 'web_interface_app/home.html')
+    with open(os.path.join('../pipe_system_visualize','input_data', 'config.json'), 'r') as fc:
+        dc = json.load(fc)
+
+
+
+    context = {
+        'npo': dc['npo_id'],
+        'min_debit': dc['min_debit'],
+        'pressure_deviation': dc['pressure_deviation'] * 100,
+        'pressure_deviation_2': dc['pressure_deviation'] * 200,
+        'pressure_optimal_value': dc['pressure_optimal_value']
+    }
+
+
+    return render(request, 'web_interface_app/home.html', context)
 
 
 def notifications(request):
