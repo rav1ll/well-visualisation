@@ -25,9 +25,8 @@ for item in dc:
     end_date = datetime.date(2023, 12, 31)
 
     random_days = (end_date - start_date).days
-    random_date = datetime.datetime.strftime(start_date + datetime.timedelta(days=random.randint(0, random_days)), '%#d %b %Y')
-
-
+    random_date = datetime.datetime.strftime(start_date + datetime.timedelta(days=random.randint(0, random_days)),
+                                             '%#d %b %Y')
 
     curr_pressure = dc[item]['pressure']
     curr_debit = dc[item]['debit']
@@ -40,9 +39,8 @@ for item in dc:
     # хардкод обработка некорректных данных
     if ' - Скв' not in curr_nam:
 
-
-
-        if curr_pressure <= optimal_pressure * (1 - 2*pressure_deviation) or curr_pressure >= optimal_pressure * (1 + 2*pressure_deviation):
+        if curr_pressure <= optimal_pressure * (1 - 2 * pressure_deviation) or curr_pressure >= optimal_pressure * (
+                1 + 2 * pressure_deviation):
             if curr_nam not in warning_dict:
                 warning_dict[curr_nam] = {}
             warning_dict[curr_nam]['pressure'] = curr_pressure

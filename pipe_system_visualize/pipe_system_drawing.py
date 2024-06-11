@@ -7,7 +7,6 @@ from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import plotly.graph_objects as go
 from pyvis import network as net
 
 
@@ -62,6 +61,8 @@ class pipeSystemDrawing():
         self.pipe_code = dc['pipe_code']
         self.optimal_debit = dc['min_debit']
         self.font_color = dc['font_color']
+        self.graph_bg_color = dc['graph_bg_color']
+        self.node_color = dc['node_color']
         if dc['font_bold']:
             self.font_bold = 'bold'
 
@@ -372,19 +373,18 @@ class pipeSystemDrawing():
         # пока цвета ребер - значения давлений, минимальные - красные, зеленые - максимальные
 
         nx.draw_kamada_kawai(G, with_labels=True, node_size=self.node_size,
-                             font_size=self.font_size, width=self.line_width, labels=label_dic, nodelist=spec_node_list,
+                             font_size=self.font_size, width=self.line_width - 4, labels=label_dic, nodelist=spec_node_list,
                              font_weight=self.font_bold,
                              bbox=label_options,
-                             edge_color=edge_color_lst, edge_cmap=plt.cm.RdYlGn)
-        nt = net.Network(height='800px', width='100%', bgcolor='#222222', font_color=self.font_color)
+                             edge_color='black', edge_cmap=plt.cm.RdYlGn)
+        nt = net.Network(height='800px', width='100%', bgcolor=self.graph_bg_color, font_color=self.font_color)
         nt.from_nx(G)
         for e in nt.edges:
-
             e['width'] = self.line_width
         for n in nt.nodes:
             n["size"] = self.node_size
             n["font"] = {"size": self.font_size, "color": self.font_color, "font_face": 'Arial'}
-            n["color"] = '#4773fc'
+            n["color"] = self.node_color
         for i, edge in enumerate(nt.edges):
 
             edge['color'] = 'red'
@@ -436,10 +436,10 @@ class pipeSystemDrawing():
         # nt.write_html(os.path.join('data_html', pic_name[:-4] + '_debit' + '.html'))
 
         change_edge_color(nt, 'debit')
-        nt.write_html(os.path.join('data_html', 'debits', pic_name[:-4] + '.html'))
+        nt.write_html(os.path.join('output_data/data_html', 'debits', pic_name[:-4] + '.html'))
 
         change_edge_color(nt, 'pressure')
-        nt.write_html(os.path.join('data_html', 'pressures', pic_name[:-4] + '.html'))
+        nt.write_html(os.path.join('output_data/data_html', 'pressures', pic_name[:-4] + '.html'))
         # draw_label = True
         # edge_label_dict = {}
         #
@@ -458,11 +458,16 @@ class pipeSystemDrawing():
         plt.savefig(os.path.join('output_data', pic_name))  # , dpi=150)
         ##04082022_end
 
-    def draw_pipe_system(self, obj_id):
+    def draw_pipe_system(self, obj_id,single_pic=False):
 
         pipe_by_graph = defaultdict(lambda:[])
         pipes_info = {}
-
+        if single_pic:
+            self.single_pic = 1
+            self.draw_wells = 0
+        else:
+            self.single_pic = 0
+            self.draw_wells = 1
         selected_keys = ["id", "tipn", "tipk", "cnt", "ckt", "pipe_dat", "cnam", "npo_idn", "npo_idk", "agent"]
         used_pipes_lst = []
         '''отрисовка системы трубопровода'''
@@ -510,15 +515,15 @@ class pipeSystemDrawing():
                         pipe_by_graph[pic_name].append(edge_labelz[item]['id'])
 
 
-            with open("input_data/pipe_by_graph.json", "w", encoding='utf-8') as json_file:
-                json.dump(dict(pipe_by_graph), json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
 
             if self.single_pic:
                 if total_G is not None:
                     pic_name = 'Полная сеть для {npo_nam}.png'.format(
                         npo_nam=str(self.pipe_data[tube_with_obj][0]['ckt']))
                     self.save_fig(total_G, total_edge_labelz, total_node_label_by_id, pic_name)
-
+            else:
+                with open("input_data/pipe_by_graph.json", "w", encoding='utf-8') as json_file:
+                    json.dump(dict(pipe_by_graph), json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
 
             # print(used_pipes_lst)
             # data = {"data": used_pipes_lst}
@@ -546,6 +551,10 @@ def draw_system():
     if pipe_drawing.npoz:
         for npo in pipe_drawing.npoz:
             print(npo)
+
+
+
+            pipe_drawing.draw_pipe_system(npo,True)
             pipe_drawing.draw_pipe_system(npo)
     else:
         wrn_msg = 'Список товарных парков пуст.'

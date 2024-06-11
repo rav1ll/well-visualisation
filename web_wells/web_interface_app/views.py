@@ -13,7 +13,7 @@ import datetime
 
 
 def debits_monitoring(request):
-    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\data_html'  # Укажите путь к папке с HTML файлами
+    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\output_data\\data_html'  # Укажите путь к папке с HTML файлами
     for dir_name in os.listdir(html_files_folder):
         if os.path.isdir(os.path.join(html_files_folder, dir_name)):
             html_files = os.listdir(os.path.join(html_files_folder, dir_name))
@@ -46,7 +46,7 @@ def debits_monitoring(request):
 
 
 def pressures_monitoring(request):
-    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\data_html'  # Укажите путь к папке с HTML файлами
+    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\output_data\\data_html'  # Укажите путь к папке с HTML файлами
     for dir_name in os.listdir(html_files_folder):
         if os.path.isdir(os.path.join(html_files_folder, dir_name)):
             html_files = os.listdir(os.path.join(html_files_folder, dir_name))
@@ -111,7 +111,7 @@ def notifications(request):
         for graph_name in dc_links:
 
             if id in dc_links[graph_name]:
-                graph_nam = graph_name
+                graph_nam = graph_name[:-4]
 
         if graph_nam != 0:
             if 'pressure' in dc[item]:
