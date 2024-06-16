@@ -13,7 +13,8 @@ import datetime
 
 
 def debits_monitoring(request):
-    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\output_data\\data_html'  # Укажите путь к папке с HTML файлами
+    html_files_folder = '../pipe_system_visualize/output_data/data_html'  # Укажите путь к папке с HTML файлами
+
     for dir_name in os.listdir(html_files_folder):
         if os.path.isdir(os.path.join(html_files_folder, dir_name)):
             html_files = os.listdir(os.path.join(html_files_folder, dir_name))
@@ -46,7 +47,7 @@ def debits_monitoring(request):
 
 
 def pressures_monitoring(request):
-    html_files_folder = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\output_data\\data_html'  # Укажите путь к папке с HTML файлами
+    html_files_folder = '../pipe_system_visualize/output_data/data_html'  # Укажите путь к папке с HTML файлами
     for dir_name in os.listdir(html_files_folder):
         if os.path.isdir(os.path.join(html_files_folder, dir_name)):
             html_files = os.listdir(os.path.join(html_files_folder, dir_name))
@@ -97,10 +98,10 @@ def home(request):
 
 
 def notifications(request):
-    notification_files_path = 'C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\input_data\\warnings.json'
+    notification_files_path = '../pipe_system_visualize/input_data/warnings.json'
     with open(notification_files_path, 'r', encoding='utf-8') as file:
         dc = json.load(file)
-    with open('C:\\Users\\ravil\\Desktop\\well-visualisation\\pipe_system_visualize\\input_data\\pipe_by_graph.json',
+    with open('../pipe_system_visualize/input_data/pipe_by_graph.json',
               'r', encoding='utf-8') as file:
         dc_links = json.load(file)
     new_dict = {}
