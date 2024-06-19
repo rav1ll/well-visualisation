@@ -29,13 +29,13 @@
     <div class="scrollable-list">
         <ul>
             {% for key, values in files.items %}
-                <div class="content" style="justify-content: space-between;">
+                <div class="content" style="justify-content: space-between; ">
 
                     <li class="notification-item" style="width: 200px; align-content: center;background-color: #cecece">{{ key }}</li>
 
-                    <li class="notification-item">{{ values.graph_nam }}</li>
+                    <li class="notification-item" style=" align-content: center;">{{ values.graph_nam }}</li>
                     <li class="notification-item">{{ values.error }}</li>
-                    <li class="notification-item">{{ values.date }}</li>
+                    <li class="notification-item" style=" align-content: center;">{{ values.date }}</li>
                 </div>
             {% endfor %}
         </ul>

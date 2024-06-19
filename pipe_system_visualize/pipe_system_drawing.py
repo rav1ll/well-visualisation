@@ -87,16 +87,10 @@ class pipeSystemDrawing():
             self.draw_wells = False
         else:
             self.draw_wells = dc['draw_wells']
-        ##04082022_start
-        # label_dic = {0:{'nam':'L', 'armits_key':'len'}, 1:{'nam':'d', 'armits_key':'diam'}}
-        label_dic = {0: {'nam': 'L', 'armits_key': 'len', 'si': 'м'}, 1: {'nam': 'd', 'armits_key': 'diam', 'si': 'мм'}}
-        ##04082022_end
 
-        label_list = dc['label_list']
-        self.labels = {el: label_dic[el] for el in label_list if el in label_dic}
 
     def load_pipe_data(self):
-        '''загрузка данных по трубопроводам из АРМИТС'''
+        '''загрузка данных по трубопроводам'''
         try:
             with open(os.path.join('input_data', 'final_pipe_data.json'), 'r', encoding='UTF-8') as fin:
                 pipe_data = json.load(fin)['data']
@@ -105,13 +99,12 @@ class pipeSystemDrawing():
 
                     if val['tipn'] == 92: continue
 
-                    # if val['sost_t'] == 58 and val['agent'] in [106, 107, 108]:  # or val['sost_t'] == 51]
                     if val['agent'] == 'oil':
                         if val['id'] not in self.pipe_data:
                             self.pipe_data[val['id']] = []
                         self.pipe_data[val['id']].append(val)
         except BaseException as e:
-            err_msg = 'Ошибка в загрузке данных по трубопроводам из КИС АРМИТС:\n{}'.format(e)
+            err_msg = 'Ошибка в загрузке данных:\n{}'.format(e)
             print(err_msg)
             logging.error(err_msg)
             sys.exit()
@@ -161,12 +154,6 @@ class pipeSystemDrawing():
         node_label_by_id[self.pipe_data[tube][0]['npo_idn']] = self.pipe_data[tube][0]['cnt']
         node_label_by_id[self.pipe_data[tube][0]['npo_idk']] = self.pipe_data[tube][0]['ckt']
 
-        # edge_labelz[(self.pipe_data[tube][0]['cnt'], self.pipe_data[tube][0]['ckt'])] = {
-        #     'id': self.pipe_data[tube][0]['id'],
-        #     'edge': (self.pipe_data[tube][0]['cnt'], self.pipe_data[tube][0]['ckt']),
-        #     'len': self.pipe_data[tube][-1]['int2'],
-        #     'diam': self.pipe_data[tube][0]['d_tr'] - 2 * self.pipe_data[tube][0]['t_st']}
-
         edge_labelz[(self.pipe_data[tube][0]['cnt'], self.pipe_data[tube][0]['ckt'])] = {
             'id': self.pipe_data[tube][0]['id'],
             'edge': (self.pipe_data[tube][0]['cnt'], self.pipe_data[tube][0]['ckt']),
@@ -192,8 +179,7 @@ class pipeSystemDrawing():
                             continue
 
                     '''Обработка врезок'''
-                    # if (key_pipe['tipk'] == 122 and key_pipe['npo_idk'] == check_pipe['id']) or (
-                    #         key_pipe['tipk'] != 122 and key_pipe['npo_idk'] == check_pipe['npo_idn']):
+
                     if (key_pipe['tipk'] == self.pipe_code and (
                             key_pipe['ckt'] == check_pipe['cnam'] or key_pipe['npo_idk'] == check_pipe['id'])) or (
                             key_pipe['tipk'] != self.pipe_code and key_pipe['ckt'] == check_pipe['cnt']):
@@ -203,17 +189,12 @@ class pipeSystemDrawing():
                         if key_pipe['tipk'] == self.pipe_code:
                             if check_pipe['tipk'] != self.pipe_code:
 
-                                ##17082022_start
-                                # key1 = 'npo_idn'
                                 key1 = 'cnt'
-                                ##17082022_end
 
                                 key2 = 'cnt'
                                 if check_pipe['tipn'] in self.npoz_ignore_list:
-                                    ##17082022_start
                                     # key1 = 'npo_idk'
                                     key1 = 'ckt'
-                                    ##17082022_end
 
                                     key2 = 'ckt'
 
@@ -224,13 +205,6 @@ class pipeSystemDrawing():
 
                                 node_label_by_id[key_pipe['npo_idn']] = key_pipe['cnt']
                                 node_label_by_id[check_pipe[key1]] = check_pipe[key2]
-
-                                # edge_labelz[(key_pipe['cnt'], check_pipe[key1])] = {'id': key_pipe['id'], 'edge': (
-                                #     key_pipe['cnt'], check_pipe[key1]),
-                                #                                                     'len': self.pipe_data[key][-1][
-                                #                                                         'int2'],
-                                #                                                     'diam': key_pipe['d_tr'] - 2 *
-                                #                                                             key_pipe['t_st']}
 
                                 edge_labelz[(key_pipe['cnt'], check_pipe[key1])] = {'id': key_pipe['id'], 'edge': (
                                     key_pipe['cnt'], check_pipe[key1]),
@@ -247,62 +221,36 @@ class pipeSystemDrawing():
                                     if check_pipe_2['tipk'] != self.pipe_code:
                                         break
 
-                                # key1 = 'npo_idn'
                                 key1 = 'cnt'
 
                                 key2 = 'cnt'
                                 if check_pipe_2['tipn'] in self.npoz_ignore_list:
-                                    ##17082022_start
-                                    # key1 = 'npo_idk'
                                     key1 = 'ckt'
-                                    ##17082022_end
 
                                     key2 = 'ckt'
 
-                                ##17082022_start
-                                # G.add_edge(key_pipe['npo_idn'], check_pipe_2[key1])
                                 G.add_edge(key_pipe['cnt'], check_pipe_2[key1])
                                 selected_data = {key: key_pipe[key] for key in selected_keys}
                                 used_pipes.append(selected_data)
-                                ##17082022_end
 
                                 node_label_by_id[key_pipe[key1]] = key_pipe['cnt']
                                 node_label_by_id[check_pipe_2[key1]] = check_pipe_2[key2]
 
-                                ##17082022_start
-                                # edge_labelz[key_pipe['id']] = {'edge': (key_pipe['npo_idn'], check_pipe_2[key1]),
-                                #                                'len': self.pipe_data[key][-1]['int2'],
-                                #                                'diam': key_pipe['d_tr'] - 2 * key_pipe['t_st']}
-                                # edge_labelz[(key_pipe['cnt'], check_pipe_2[key1])] = {'id': key_pipe['id'], 'edge': (
-                                #     key_pipe['cnt'], check_pipe_2[key1]),
-                                #                                                       'len': self.pipe_data[key][-1][
-                                #                                                           'int2'],
-                                #                                                       'diam': key_pipe['d_tr'] - 2 *
-                                #                                                               key_pipe['t_st']}
                                 edge_labelz[(key_pipe['cnt'], check_pipe_2[key1])] = {'id': key_pipe['id'], 'edge': (
                                     key_pipe['cnt'], check_pipe_2[key1]),
                                                                                       }
 
                         else:
 
-                            ##17082022_start
                             # G.add_edge(key_pipe['npo_idn'], key_pipe['npo_idk'])
                             G.add_edge(key_pipe['cnt'], key_pipe['ckt'])
 
                             selected_data = {key: key_pipe[key] for key in selected_keys}
                             used_pipes.append(selected_data)
-                            ##17082022_end
 
                             node_label_by_id[key_pipe['npo_idn']] = key_pipe['cnt']
                             node_label_by_id[key_pipe['npo_idk']] = key_pipe['ckt']
 
-                            ##17082022_start
-                            # edge_labelz[key_pipe['id']] = {'edge': (key_pipe['npo_idn'], key_pipe['npo_idk']), 'len': self.pipe_data[key][-1]['int2'], 'diam': key_pipe['d_tr'] - 2 * key_pipe['t_st']}
-                            # edge_labelz[(key_pipe['cnt'], key_pipe['ckt'])] = {'id': key_pipe['id'], 'edge': (
-                            #     key_pipe['cnt'], key_pipe['ckt']),
-                            #                                                    'len': self.pipe_data[key][-1]['int2'],
-                            #                                                    'diam': key_pipe['d_tr'] - 2 * key_pipe[
-                            #                                                        't_st']}
                             edge_labelz[(key_pipe['cnt'], key_pipe['ckt'])] = {'id': key_pipe['id'], 'edge': (
                                 key_pipe['cnt'], key_pipe['ckt']),
                                                                                }
@@ -327,24 +275,6 @@ class pipeSystemDrawing():
 
                 if el[0] == check_tuple[1] and el[1] == check_tuple[0]:
                     return edge_labelz[el]['id']
-
-        # 16.04.2024 - убрано тк не имеет эффекта
-        # to_remove_edges = []
-        # to_remove_nodes = []
-        # remove_wells = False
-        # if remove_wells:
-        #     for edge in G.edges():
-        #         pipe_id = get_pipe_id(edge)
-        #
-        #         if self.pipe_data[pipe_id][0]['tipn'] == 1:
-        #             print(1)
-        #             print(edge, self.pipe_data[pipe_id][0])
-        #             to_remove_nodes.append(edge[1])
-        #
-        # if to_remove_edges:
-        #     G.remove_edges_from(to_remove_edges)
-        # if to_remove_nodes:
-        #     G.remove_nodes_from(to_remove_nodes)
 
         return G, edge_labelz, node_label_by_id, used_pipes
 
@@ -373,7 +303,8 @@ class pipeSystemDrawing():
         # пока цвета ребер - значения давлений, минимальные - красные, зеленые - максимальные
 
         nx.draw_kamada_kawai(G, with_labels=True, node_size=self.node_size,
-                             font_size=self.font_size, width=self.line_width - 4, labels=label_dic, nodelist=spec_node_list,
+                             font_size=self.font_size, width=self.line_width - 4, labels=label_dic,
+                             nodelist=spec_node_list,
                              font_weight=self.font_bold,
                              bbox=label_options,
                              edge_color='black', edge_cmap=plt.cm.RdYlGn)
@@ -386,10 +317,7 @@ class pipeSystemDrawing():
             n["font"] = {"size": self.font_size, "color": self.font_color, "font_face": 'Arial'}
             n["color"] = self.node_color
         for i, edge in enumerate(nt.edges):
-
             edge['color'] = 'red'
-
-
 
         def change_edge_color(g, param_name):
 
@@ -404,7 +332,6 @@ class pipeSystemDrawing():
                     edge_id = (edge["to"], edge["from"])
                 param_value = edge_values_dict[edge_id][param_name]
                 edge['title'] = param_name + ': ' + str(param_value) + '\n date: ' + edge_values_dict[edge_id]['time']
-
 
                 if param_name == 'pressure':
                     if self.optimal_pressure * (1 - self.press_deviation) <= float(
@@ -453,14 +380,11 @@ class pipeSystemDrawing():
         figure = plt.gcf()  # get current figure
         figure.set_size_inches(30, 20)
 
+        plt.savefig(os.path.join('output_data', pic_name))
 
-        ##04082022_start
-        plt.savefig(os.path.join('output_data', pic_name))  # , dpi=150)
-        ##04082022_end
+    def draw_pipe_system(self, obj_id, single_pic=False):
 
-    def draw_pipe_system(self, obj_id,single_pic=False):
-
-        pipe_by_graph = defaultdict(lambda:[])
+        pipe_by_graph = defaultdict(lambda: [])
         pipes_info = {}
         if single_pic:
             self.single_pic = 1
@@ -472,7 +396,6 @@ class pipeSystemDrawing():
         used_pipes_lst = []
         '''отрисовка системы трубопровода'''
 
-
         if not self.pipe_data:
             err_msg = 'Отсутствуют данные по трубопроводам'
             print(err_msg)
@@ -482,7 +405,6 @@ class pipeSystemDrawing():
         tube_with_obj_list = self.get_pipe_with_obj(obj_id)
         if tube_with_obj_list:
 
-            ##04082022_start
             total_G = None
             total_edge_labelz = {}
             total_node_label_by_id = {}
@@ -514,8 +436,6 @@ class pipeSystemDrawing():
                     for item in edge_labelz:
                         pipe_by_graph[pic_name].append(edge_labelz[item]['id'])
 
-
-
             if self.single_pic:
                 if total_G is not None:
                     pic_name = 'Полная сеть для {npo_nam}.png'.format(
@@ -530,7 +450,6 @@ class pipeSystemDrawing():
             #
             # with open("input_data/output.json", "w", encoding='utf-8') as json_file:
             #     json.dump(data, json_file, ensure_ascii=False, indent=4, separators=(',', ': '))
-            ##04082022_end
         else:
             wrn_msg = 'Для объекта НПО {} отсутствуют трубопроводы, содержащие данный объект.'.format(obj_id)
             print(wrn_msg)
@@ -540,7 +459,6 @@ class pipeSystemDrawing():
 def draw_system():
     pipe_drawing = pipeSystemDrawing()
 
-    ##24052022_start
     pipe_drawing.load_pipe_data()
 
     if pipe_drawing.obj_id != -1:
@@ -552,15 +470,12 @@ def draw_system():
         for npo in pipe_drawing.npoz:
             print(npo)
 
-
-
-            pipe_drawing.draw_pipe_system(npo,True)
+            pipe_drawing.draw_pipe_system(npo, True)
             pipe_drawing.draw_pipe_system(npo)
     else:
         wrn_msg = 'Список товарных парков пуст.'
         print(wrn_msg)
         logging.error(wrn_msg)
-    ##24052022_end
 
 
 if __name__ == '__main__':

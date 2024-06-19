@@ -31,7 +31,8 @@
             gap: 30px;
             background-color: #ffffff;
             height: 80%;
-            width: 500px
+            width: 1000px;
+            font-size: 30px;
         }
 
         nav {
@@ -61,6 +62,11 @@
         li a:hover {
             background-color: #c24a4a;
         }
+        label {
+            background-color: #86d5f8;
+            padding: 30px;
+            border-radius: 20px;
+        }
 
     </style>
 
@@ -77,13 +83,14 @@
 </head>
 
 <body>
+
 <div class="info-container">
 
-    <label style="background-color: #86d5f8; padding: 30px"> Система мониторинга нефтяных насосов</label>
-    <label style="background-color: #86d5f8; padding: 30px"> Для задания лимитов используйте конфигурационный файл</label>
-    <label style="background-color: #86d5f8; padding: 30px"> Сеть собирается от объекта с ID {{ npo }}</label>
-    <label style="background-color: #86d5f8; padding: 30px"> Текущая настройка для дебитов: при значении меньше {{ min_debit }} - уведомление</label>
-    <label style="background-color: #86d5f8; padding: 30px"> Текущая настройка для давлений: оптимальное = {{ pressure_optimal_value }},
+    <label style="background-color: #4d173e; color: #ffffff;"> Основная информация</label>
+    <label > Для задания лимитов используйте конфигурационный файл</label>
+    <label > Сеть собирается от объекта {{ npo_name }} с ID {{ npo_id }}</label>
+    <label style="background-color: #17354d; color: #ffffff;"> Текущая настройка для дебитов: при значении меньше {{ min_debit }} - уведомление</label>
+    <label style="background-color: #17354d;  color: #ffffff;"> Текущая настройка для давлений: оптимальное = {{ pressure_optimal_value }},
         уведомление при отклонении на более чем {{ pressure_deviation }} процентов, предупреждение начиная с {{ pressure_deviation_2 }} процентов</label>
 </body>
 </html>

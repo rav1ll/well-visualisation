@@ -83,10 +83,20 @@ def home(request):
     with open(os.path.join('../pipe_system_visualize','input_data', 'config.json'), 'r') as fc:
         dc = json.load(fc)
 
+    with open(os.path.join('../pipe_system_visualize','input_data', 'final_pipe_data.json'), 'r', encoding='utf-8') as fc:
+        dc1 = json.load(fc)
 
+    npo_id =  dc['npo_id']
+    for item in dc1['data']:
+        if item['npo_idk'] == npo_id:
+            npo_name = item['ckt']
+
+        if item['npo_idn'] == npo_id:
+            npo_name = item['cnt']
 
     context = {
-        'npo': dc['npo_id'],
+        'npo_id': npo_id,
+        'npo_name': npo_name,
         'min_debit': dc['min_debit'],
         'pressure_deviation': dc['pressure_deviation'] * 100,
         'pressure_deviation_2': dc['pressure_deviation'] * 200,
